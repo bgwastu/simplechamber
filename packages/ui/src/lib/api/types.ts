@@ -434,7 +434,10 @@ export interface SimpleChamberSettings {
   hiddenUI?: string[];
   customUI?: string[];
   visibleTabs?: string[];
+  phrases?: string[];
 }
+
+
 
 export interface SettingsPayload {
   themeId?: string;

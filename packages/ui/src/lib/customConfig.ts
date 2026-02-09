@@ -17,7 +17,10 @@ export interface UIConfig {
   hiddenUI?: readonly string[];
   /** Custom UI feature IDs to enable (e.g. 'search-session-input', 'new-session-button'). */
   customUI?: readonly string[];
+  /** Custom phrases to show in the chat empty state. */
+  phrases?: readonly string[];
 }
+
 
 const DEFAULT_UI_CONFIG: UIConfig = {};
 
@@ -61,9 +64,11 @@ export async function loadSimpleChamberSettings(): Promise<SimpleChamberSettings
           hiddenUI: Array.isArray(simplechamber.hiddenUI) ? simplechamber.hiddenUI : undefined,
           customUI: Array.isArray(simplechamber.customUI) ? simplechamber.customUI : undefined,
           visibleTabs: Array.isArray(simplechamber.visibleTabs) ? simplechamber.visibleTabs : undefined,
+          phrases: Array.isArray(simplechamber.phrases) ? simplechamber.phrases : undefined,
         };
         return settingsCache;
       }
+
       settingsCache = {};
       return settingsCache;
     } catch {
@@ -101,9 +106,13 @@ export async function initSimpleChamberConfig(): Promise<void> {
     customUI: apiSettings.customUI?.length
       ? apiSettings.customUI
       : DEFAULT_UI_CONFIG.customUI,
+    phrases: apiSettings.phrases?.length
+      ? apiSettings.phrases
+      : DEFAULT_UI_CONFIG.phrases,
   };
 
   window.__OPENCHAMBER_UI_CONFIG__ = mergedConfig;
+
   window.__SIMPLECHAMBER_SETTINGS_LOADED__ = true;
 }
 
@@ -149,4 +158,13 @@ export function hasCustomUI(featureId: string): boolean {
     return false;
   }
   return customUI.includes(featureId);
+}
+
+/**
+ * Returns the custom phrases for the chat empty state.
+ * If not configured, returns undefined (falls back to default).
+ */
+export function getChatPhrases(): readonly string[] | undefined {
+  const config = getUIConfig();
+  return config.phrases;
 }

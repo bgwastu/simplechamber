@@ -3,8 +3,9 @@ import React from 'react';
 import { OpenChamberLogo } from '@/components/ui/OpenChamberLogo';
 import { TextLoop } from '@/components/ui/TextLoop';
 import { useThemeSystem } from '@/contexts/useThemeSystem';
+import { getChatPhrases } from '@/lib/customConfig';
 
-const phrases = [
+const defaultPhrases = [
     "Fix the failing tests",
     "Refactor this to be more readable",
     "Add form validation",
@@ -25,6 +26,8 @@ const phrases = [
 
 const ChatEmptyState: React.FC = () => {
     const { currentTheme } = useThemeSystem();
+    const customPhrases = getChatPhrases();
+    const phrases = customPhrases && customPhrases.length > 0 ? customPhrases : defaultPhrases;
 
     // Use theme's muted foreground for secondary text
     const textColor = currentTheme?.colors?.surface?.mutedForeground || 'var(--muted-foreground)';

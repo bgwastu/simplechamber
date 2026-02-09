@@ -921,7 +921,12 @@ const sanitizeSettingsUpdate = (payload) => {
   const result = {};
 
   if (candidate.simplechamber && typeof candidate.simplechamber === 'object') {
-    result.simplechamber = candidate.simplechamber;
+    result.simplechamber = {};
+    const sc = candidate.simplechamber;
+    if (Array.isArray(sc.hiddenUI)) result.simplechamber.hiddenUI = sc.hiddenUI;
+    if (Array.isArray(sc.customUI)) result.simplechamber.customUI = sc.customUI;
+    if (Array.isArray(sc.visibleTabs)) result.simplechamber.visibleTabs = sc.visibleTabs;
+    if (Array.isArray(sc.phrases)) result.simplechamber.phrases = sc.phrases;
   }
 if (typeof candidate.themeId === 'string' && candidate.themeId.length > 0) {
     result.themeId = candidate.themeId;
