@@ -47,3 +47,6 @@ registerSW({
 });
 
 import('@openchamber/ui/main');
+
+// Session search - DOM-based filtering (no changes to main components)
+import('./session-search');
