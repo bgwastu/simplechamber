@@ -28,3 +28,4 @@ local-dev*
 *.sw?
 .opencode/plans/*
 .hive
+.dev

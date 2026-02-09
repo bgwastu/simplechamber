@@ -1,5 +1,6 @@
 import { createWebAPIs } from './api';
 import { registerSW } from 'virtual:pwa-register';
+import { initSimpleChamberConfig } from '@openchamber/ui/lib/customConfig';
 
 import type { RuntimeAPIs } from '@openchamber/ui/lib/api/types';
 import '@openchamber/ui/index.css';
@@ -12,27 +13,8 @@ declare global {
 }
 
 window.__OPENCHAMBER_RUNTIME_APIS__ = createWebAPIs();
-// Default UI config (visible tabs, hidden UI, added UI). 
-// These are overridden by settings.json simplechamber.* values if present.
-const win = window as Window & { __OPENCHAMBER_UI_CONFIG__?: { visibleTabs?: string[]; hiddenUI?: string[]; customUI?: string[] } };
-if (win.__OPENCHAMBER_UI_CONFIG__ === undefined) {
-  win.__OPENCHAMBER_UI_CONFIG__ = {
-    visibleTabs: ['chat', 'plan', 'terminal', 'files'],
-    hiddenUI: [
-      'git', // also hides: git-identities, session-header-actions
-      'multi-run',
-      'about',
-      'message-fork',
-      'message-new-session',
-      'diff-view-tabs',
-      'keyboard-shortcuts',
-    ],
-    customUI: [
-      'search-session-input',
-      'new-session-button',
-    ],
-  };
-}
+
+await initSimpleChamberConfig();
 
 registerSW({
   onRegistered(registration: ServiceWorkerRegistration | undefined) {

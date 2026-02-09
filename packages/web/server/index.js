@@ -920,7 +920,10 @@ const sanitizeSettingsUpdate = (payload) => {
   const candidate = payload;
   const result = {};
 
-  if (typeof candidate.themeId === 'string' && candidate.themeId.length > 0) {
+  if (candidate.simplechamber && typeof candidate.simplechamber === 'object') {
+    result.simplechamber = candidate.simplechamber;
+  }
+if (typeof candidate.themeId === 'string' && candidate.themeId.length > 0) {
     result.themeId = candidate.themeId;
   }
   if (typeof candidate.themeVariant === 'string' && (candidate.themeVariant === 'light' || candidate.themeVariant === 'dark')) {

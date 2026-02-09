@@ -19,6 +19,8 @@ export interface UIConfig {
   customUI?: readonly string[];
 }
 
+const DEFAULT_UI_CONFIG: UIConfig = {};
+
 declare global {
   interface Window {
     __OPENCHAMBER_UI_CONFIG__?: UIConfig;
@@ -87,19 +89,18 @@ export async function initSimpleChamberConfig(): Promise<void> {
   }
 
   const apiSettings = await loadSimpleChamberSettings();
-  const windowConfig = window.__OPENCHAMBER_UI_CONFIG__ ?? {};
 
-  // Merge API settings with window config (API settings take precedence)
+  // Merge: API settings override defaults
   const mergedConfig: UIConfig = {
     visibleTabs: apiSettings.visibleTabs?.length
       ? (apiSettings.visibleTabs as MainTab[])
-      : windowConfig.visibleTabs,
+      : DEFAULT_UI_CONFIG.visibleTabs,
     hiddenUI: apiSettings.hiddenUI?.length
       ? apiSettings.hiddenUI
-      : windowConfig.hiddenUI,
+      : DEFAULT_UI_CONFIG.hiddenUI,
     customUI: apiSettings.customUI?.length
       ? apiSettings.customUI
-      : windowConfig.customUI,
+      : DEFAULT_UI_CONFIG.customUI,
   };
 
   window.__OPENCHAMBER_UI_CONFIG__ = mergedConfig;
