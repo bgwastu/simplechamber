@@ -11,6 +11,7 @@ import { DiffWorkerProvider } from '@/contexts/DiffWorkerProvider';
 import { MultiRunLauncher } from '@/components/multirun';
 
 import { useUIStore } from '@/stores/useUIStore';
+import { getVisibleTabs, isUIHidden } from '@/lib/customConfig';
 import { useUpdateStore } from '@/stores/useUpdateStore';
 import { useDeviceInfo } from '@/lib/device';
 import { useEdgeSwipe } from '@/hooks/useEdgeSwipe';
@@ -22,6 +23,7 @@ export const MainLayout: React.FC = () => {
     const {
         isSidebarOpen,
         activeMainTab,
+        setActiveMainTab,
         setIsMobile,
         isSessionSwitcherOpen,
         isSettingsDialogOpen,
@@ -284,7 +286,19 @@ export const MainLayout: React.FC = () => {
         };
     }, [isMobile]);
 
+    const visibleTabs = React.useMemo(() => getVisibleTabs(), []);
+    const isTabVisible = visibleTabs.includes(activeMainTab);
+
+    React.useEffect(() => {
+        if (!isTabVisible && activeMainTab !== 'chat') {
+            setActiveMainTab('chat');
+        }
+    }, [activeMainTab, isTabVisible, setActiveMainTab]);
+
     const secondaryView = React.useMemo(() => {
+        if (!isTabVisible) {
+            return null;
+        }
         switch (activeMainTab) {
             case 'plan':
                 return <PlanView />;
@@ -299,7 +313,7 @@ export const MainLayout: React.FC = () => {
             default:
                 return null;
         }
-    }, [activeMainTab]);
+    }, [activeMainTab, isTabVisible]);
 
     const isChatActive = activeMainTab === 'chat';
 
@@ -348,7 +362,7 @@ export const MainLayout: React.FC = () => {
                     </div>
 
                     {/* Mobile multi-run launcher: full screen */}
-                    {isMultiRunLauncherOpen && (
+                    {!isUIHidden('multi-run') && isMultiRunLauncherOpen && (
                         <div className="absolute inset-0 z-10 bg-background header-safe-area">
                             <ErrorBoundary>
                                 <MultiRunLauncher
@@ -372,7 +386,7 @@ export const MainLayout: React.FC = () => {
                     {/* Desktop: Header always on top, then Sidebar + Content below */}
                     <div className="flex flex-1 flex-col overflow-hidden relative">
                         {/* Normal view: Header above Sidebar + content (like SettingsView) */}
-                        <div className={cn('absolute inset-0 flex flex-col', isMultiRunLauncherOpen && 'invisible')}>
+                        <div className={cn('absolute inset-0 flex flex-col', !isUIHidden('multi-run') && isMultiRunLauncherOpen && 'invisible')}>
                             <Header />
                             <div className="flex flex-1 overflow-hidden">
                                 <Sidebar isOpen={isSidebarOpen} isMobile={isMobile}>
@@ -392,7 +406,7 @@ export const MainLayout: React.FC = () => {
                         </div>
 
                         {/* Multi-Run Launcher: replaces tabs content only */}
-                        {isMultiRunLauncherOpen && (
+                        {!isUIHidden('multi-run') && isMultiRunLauncherOpen && (
                             <div className={cn('absolute inset-0 z-10 bg-background')}>
                                 <ErrorBoundary>
                                     <MultiRunLauncher

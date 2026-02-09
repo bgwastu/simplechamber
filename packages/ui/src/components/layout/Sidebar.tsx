@@ -3,6 +3,7 @@ import { RiDownloadLine, RiInformationLine, RiSettings3Line } from '@remixicon/r
 import { toast } from '@/components/ui';
 import { cn } from '@/lib/utils';
 import { ErrorBoundary } from '../ui/ErrorBoundary';
+import { isUIHidden } from '@/lib/customConfig';
 import { useUIStore } from '@/stores/useUIStore';
 import { useUpdateStore } from '@/stores/useUpdateStore';
 import { UpdateDialog } from '../ui/UpdateDialog';
@@ -208,7 +209,7 @@ export const Sidebar: React.FC<SidebarProps> = ({ isOpen, isMobile, children }) 
                                     <span>Update</span>
                                 </button>
 
-                        ) : !isDesktopApp && (
+                        ) : !isDesktopApp && !isUIHidden('about') && (
                             <Tooltip>
                                 <TooltipTrigger asChild>
                                     <button

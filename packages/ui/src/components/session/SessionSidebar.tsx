@@ -75,6 +75,7 @@ import { useRuntimeAPIs } from '@/hooks/useRuntimeAPIs';
 import type { GitHubPullRequestStatus } from '@/lib/api/types';
 import { GitHubIssuePickerDialog } from './GitHubIssuePickerDialog';
 import { GitHubPullRequestPickerDialog } from './GitHubPullRequestPickerDialog';
+import { isUIHidden } from '@/lib/customConfig';
 
 const ATTENTION_DIAMOND_INDICES = new Set([1, 3, 4, 5, 7]);
 
@@ -257,7 +258,7 @@ interface SortableProjectItemProps {
   onNewWorktreeSession?: () => void;
   onNewSessionFromGitHubIssue?: () => void;
   onNewSessionFromGitHubPR?: () => void;
-  onOpenMultiRunLauncher: () => void;
+  onOpenMultiRunLauncher?: () => void;
   onRenameStart: () => void;
   onRenameSave: () => void;
   onRenameCancel: () => void;
@@ -708,6 +709,9 @@ export const SessionSidebar: React.FC<SessionSidebarProps> = ({
   const isDesktopShellRuntime = React.useMemo(() => isDesktopShell(), []);
 
   const isVSCode = React.useMemo(() => isVSCodeRuntime(), []);
+
+  const hideGit = isUIHidden('git');
+  const hideMultiRun = isUIHidden('multi-run');
 
   const openExternal = React.useCallback(async (url: string) => {
     if (typeof window === 'undefined') return;
@@ -2340,7 +2344,7 @@ export const SessionSidebar: React.FC<SessionSidebarProps> = ({
               ) : (
                 <RiArrowDownSLine className="h-3.5 w-3.5 flex-shrink-0 text-muted-foreground mt-1" />
               )}
-              {!group.isMain || isGitProject ? (
+              {!hideGit && (!group.isMain || isGitProject) ? (
                 !group.isMain && groupPr?.url ? (
                   <Tooltip>
                     <TooltipTrigger asChild>
@@ -2617,10 +2621,12 @@ export const SessionSidebar: React.FC<SessionSidebarProps> = ({
               <RiFolderAddLine className="h-4.5 w-4.5" />
             </button>
           </div>
-          {reserveHeaderActionsSpace ? (
+          {reserveHeaderActionsSpace && !isUIHidden('session-header-actions') && (
             <div className="mt-1 h-8 pl-1">
-              {activeProjectIsRepo ? (
+              {activeProjectIsRepo && (
               <div className="inline-flex h-8 items-center gap-1.5 rounded-md pl-0 pr-1">
+              {!isUIHidden('git') && (
+              <>
               <Tooltip>
                 <TooltipTrigger asChild>
                   <button
@@ -2676,6 +2682,9 @@ export const SessionSidebar: React.FC<SessionSidebarProps> = ({
                 </TooltipTrigger>
                 <TooltipContent side="bottom" sideOffset={4}><p>New from PR</p></TooltipContent>
               </Tooltip>
+              </>
+              )}
+              {!isUIHidden('multi-run') && (
               <Tooltip>
                 <TooltipTrigger asChild>
                   <button
@@ -2689,10 +2698,11 @@ export const SessionSidebar: React.FC<SessionSidebarProps> = ({
                 </TooltipTrigger>
                 <TooltipContent side="bottom" sideOffset={4}><p>New multi-run</p></TooltipContent>
               </Tooltip>
+              )}
               </div>
-              ) : null}
+              )}
             </div>
-          ) : null}
+          )}
         </div>
       )}
 
@@ -2771,7 +2781,7 @@ export const SessionSidebar: React.FC<SessionSidebarProps> = ({
                       }
                       openNewSessionDraft({ directoryOverride: project.normalizedPath });
                     }}
-                    onNewWorktreeSession={() => {
+                    onNewWorktreeSession={hideGit ? undefined : () => {
                       if (projectKey !== activeProjectId) {
                         setActiveProject(projectKey);
                       }
@@ -2781,19 +2791,19 @@ export const SessionSidebar: React.FC<SessionSidebarProps> = ({
                       }
                       createWorktreeSession();
                     }}
-                    onNewSessionFromGitHubIssue={() => {
+                    onNewSessionFromGitHubIssue={hideGit ? undefined : () => {
                       if (projectKey !== activeProjectId) {
                         setActiveProject(projectKey);
                       }
                       setIssuePickerOpen(true);
                     }}
-                    onNewSessionFromGitHubPR={() => {
+                    onNewSessionFromGitHubPR={hideGit ? undefined : () => {
                       if (projectKey !== activeProjectId) {
                         setActiveProject(projectKey);
                       }
                       setPullRequestPickerOpen(true);
                     }}
-                    onOpenMultiRunLauncher={() => {
+                    onOpenMultiRunLauncher={hideMultiRun ? undefined : () => {
                       if (projectKey !== activeProjectId) {
                         setActiveProject(projectKey);
                       }

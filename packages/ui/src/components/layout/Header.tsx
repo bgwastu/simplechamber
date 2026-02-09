@@ -49,6 +49,7 @@ import type { GitHubAuthStatus } from '@/lib/api/types';
 import { DesktopHostSwitcherButton } from '@/components/desktop/DesktopHostSwitcher';
 import { OpenInAppButton } from '@/components/desktop/OpenInAppButton';
 import { isDesktopShell } from '@/lib/desktop';
+import { getVisibleTabs, isUIHidden } from '@/lib/customConfig';
 
 const formatTime = (timestamp: number | null) => {
   if (!timestamp) return '-';
@@ -613,7 +614,12 @@ export const Header: React.FC = () => {
       },
     );
 
-    return base;
+    const visibleTabs = getVisibleTabs();
+    return base.filter(
+      (t) =>
+        visibleTabs.includes(t.id) &&
+        (t.id !== 'git' || !isUIHidden('git'))
+    );
   }, [diffFileCount, isMobile, showPlanTab]);
 
   useEffect(() => {
@@ -752,22 +758,25 @@ export const Header: React.FC = () => {
         {isDesktopApp && (
           <DesktopHostSwitcherButton headerIconButtonClass={headerIconButtonClass} />
         )}
-        <Tooltip delayDuration={500}>
-          <TooltipTrigger asChild>
-            <button
-              type="button"
-              onClick={toggleCommandPalette}
-              aria-label="Open command palette"
-              className={headerIconButtonClass}
-            >
-              <RiCommandLine className="h-5 w-5" />
-            </button>
-          </TooltipTrigger>
-          <TooltipContent>
-            <p>Command Palette ({getModifierLabel()}+K)</p>
-          </TooltipContent>
-        </Tooltip>
+        {!isUIHidden('command-palette') && (
+          <Tooltip delayDuration={500}>
+            <TooltipTrigger asChild>
+              <button
+                type="button"
+                onClick={toggleCommandPalette}
+                aria-label="Open command palette"
+                className={headerIconButtonClass}
+              >
+                <RiCommandLine className="h-5 w-5" />
+              </button>
+            </TooltipTrigger>
+            <TooltipContent>
+              <p>Command Palette ({getModifierLabel()}+K)</p>
+            </TooltipContent>
+          </Tooltip>
+        )}
 
+        {!isUIHidden('rate-limits') && (
         <DropdownMenu onOpenChange={(open) => {
           if (open && quotaResults.length === 0) {
             fetchAllQuotas();
@@ -968,6 +977,7 @@ export const Header: React.FC = () => {
             })}
           </DropdownMenuContent>
         </DropdownMenu>
+        )}
         <McpDropdown headerIconButtonClass={headerIconButtonClass} />
 
         <Tooltip delayDuration={500}>
@@ -1178,6 +1188,7 @@ export const Header: React.FC = () => {
 
             <McpDropdown headerIconButtonClass={headerIconButtonClass} />
 
+            {!isUIHidden('rate-limits') && (
             <DropdownMenu
               open={isMobileRateLimitsOpen}
               onOpenChange={(open) => {
@@ -1358,6 +1369,7 @@ export const Header: React.FC = () => {
                 </div>
               </DropdownMenuContent>
             </DropdownMenu>
+            )}
 
             <Tooltip delayDuration={500}>
               <TooltipTrigger asChild>

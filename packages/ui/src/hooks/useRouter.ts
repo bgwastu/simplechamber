@@ -5,6 +5,7 @@ import { parseRoute, updateBrowserURL, hasRouteParams } from '@/lib/router';
 import type { RouteState, AppRouteState } from '@/lib/router';
 import type { SidebarSection } from '@/constants/sidebar';
 import type { MainTab } from '@/stores/useUIStore';
+import { getVisibleTabs } from '@/lib/customConfig';
 
 /**
  * Check if running in VS Code webview context.
@@ -77,9 +78,11 @@ export function useRouter(): void {
           setSettingsDialogOpen(false);
         }
 
-        // 3. Apply tab
+        // 3. Apply tab (fall back to chat if tab is hidden by config)
         if (route.tab) {
-          setActiveMainTab(route.tab);
+          const visibleTabs = getVisibleTabs();
+          const tab = visibleTabs.includes(route.tab) ? route.tab : 'chat';
+          setActiveMainTab(tab);
         }
 
         // 4. Apply diff file (only if going to diff tab)

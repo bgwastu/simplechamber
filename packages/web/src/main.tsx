@@ -12,6 +12,23 @@ declare global {
 }
 
 window.__OPENCHAMBER_RUNTIME_APIS__ = createWebAPIs();
+// Optional UI config (visible tabs, hidden UI). UI reads from window.__OPENCHAMBER_UI_CONFIG__.
+const win = window as Window & { __OPENCHAMBER_UI_CONFIG__?: { visibleTabs?: string[]; hiddenUI?: string[] } };
+if (win.__OPENCHAMBER_UI_CONFIG__ === undefined) {
+  win.__OPENCHAMBER_UI_CONFIG__ = {
+    visibleTabs: ['chat', 'plan', 'terminal', 'files'],
+    hiddenUI: [
+      'git',
+      'multi-run',
+      'about',
+      'git-identities',
+      'message-fork',
+      'message-new-session',
+      'diff-view-tabs',
+      'session-header-actions',
+    ],
+  };
+}
 
 registerSW({
   onRegistered(registration: ServiceWorkerRegistration | undefined) {

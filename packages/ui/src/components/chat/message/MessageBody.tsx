@@ -25,6 +25,7 @@ import { useUIStore } from '@/stores/useUIStore';
 import { flattenAssistantTextParts } from '@/lib/messages/messageText';
 import { MULTIRUN_EXECUTION_FORK_PROMPT_META_TEXT } from '@/lib/messages/executionMeta';
 import { TextSelectionMenu } from './TextSelectionMenu';
+import { isUIHidden } from '@/lib/customConfig';
 
 const formatTurnDuration = (durationMs: number): string => {
     const totalSeconds = durationMs / 1000;
@@ -205,7 +206,7 @@ const UserMessageBody: React.FC<{
                             <TooltipContent sideOffset={6}>Revert from here</TooltipContent>
                         </Tooltip>
                     )}
-                    {onFork && (
+                    {onFork && !isUIHidden('message-fork') && (
                         <Tooltip delayDuration={1000}>
                             <TooltipTrigger asChild>
                                 <Button
@@ -851,6 +852,7 @@ const AssistantMessageBody: React.FC<Omit<MessageBodyProps, 'isUser'>> = ({
 
     const footerButtons = (
          <>
+              {!isUIHidden('message-new-session') && (
               <Tooltip delayDuration={1000}>
                   <TooltipTrigger asChild>
                       <Button
@@ -866,6 +868,8 @@ const AssistantMessageBody: React.FC<Omit<MessageBodyProps, 'isUser'>> = ({
                   </TooltipTrigger>
                   <TooltipContent sideOffset={6}>Start new session from this answer</TooltipContent>
               </Tooltip>
+              )}
+              {!isUIHidden('multi-run') && (
               <Tooltip delayDuration={1000}>
                   <TooltipTrigger asChild>
                       <Button
@@ -881,6 +885,7 @@ const AssistantMessageBody: React.FC<Omit<MessageBodyProps, 'isUser'>> = ({
                   </TooltipTrigger>
                   <TooltipContent sideOffset={6}>Start new multi-run from this answer</TooltipContent>
               </Tooltip>
+              )}
 
              {onCopyMessage && (
                  <Tooltip delayDuration={1000}>

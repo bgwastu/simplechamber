@@ -34,11 +34,12 @@ import { OpenChamberSidebar, type OpenChamberSection } from '@/components/sectio
 import { ErrorBoundary } from '@/components/ui/ErrorBoundary';
 import { useDeviceInfo } from '@/lib/device';
 import { isVSCodeRuntime } from '@/lib/desktop';
+import { isUIHidden } from '@/lib/customConfig';
 
-const getSettingsSections = (isVSCode: boolean) => {
+const getSettingsSections = (isVSCode: boolean, hideGitIdentities: boolean) => {
   let filtered = SIDEBAR_SECTIONS.filter(section => section.id !== 'sessions');
-  // Hide Git Identities tab for VS Code
-  if (isVSCode) {
+  // Hide Git Identities tab for VS Code or when hidden by config
+  if (isVSCode || hideGitIdentities) {
     filtered = filtered.filter(section => section.id !== 'git-identities');
   }
   const settingsSection = filtered.find(s => s.id === 'settings');
@@ -116,7 +117,8 @@ export const SettingsView: React.FC<SettingsViewProps> = ({ onClose, forceMobile
 
   const isVSCode = React.useMemo(() => isVSCodeRuntime(), []);
 
-  const settingsSections = React.useMemo(() => getSettingsSections(isVSCode), [isVSCode]);
+  const hideGitIdentities = isUIHidden('git-identities');
+  const settingsSections = React.useMemo(() => getSettingsSections(isVSCode, hideGitIdentities), [isVSCode, hideGitIdentities]);
 
   const isDesktopApp = isTauri;
 

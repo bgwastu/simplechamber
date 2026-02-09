@@ -24,6 +24,7 @@ import { DiffViewToggle } from '@/components/chat/message/DiffViewToggle';
 import type { DiffViewMode } from '@/components/chat/message/types';
 import { PierreDiffViewer } from './PierreDiffViewer';
 import { useDeviceInfo } from '@/lib/device';
+import { isUIHidden } from '@/lib/customConfig';
 
 // Minimum width for side-by-side diff view (px)
 const SIDE_BY_SIDE_MIN_WIDTH = 1100;
@@ -1192,7 +1193,7 @@ export const DiffView: React.FC = () => {
                         </span>
                     </div>
                 )}
-                {!isMobileLayout && (
+                {!isMobileLayout && !isUIHidden('diff-view-tabs') && (
                     <DiffViewModeSelector mode={diffViewMode} onModeChange={handleDiffViewModeChange} />
                 )}
                 {showFileSelector && (
