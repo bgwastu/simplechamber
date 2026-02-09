@@ -11,12 +11,12 @@ const ALL_TABS: readonly MainTab[] = [
 ] as const;
 
 export interface UIConfig {
-  /** Tab IDs to show in the header; if absent, all tabs are visible. */
-  visibleTabs?: readonly MainTab[];
   /** Feature IDs to hide (e.g. 'rate-limits', 'command-palette'). */
   hiddenUI?: readonly string[];
   /** Custom UI feature IDs to enable (e.g. 'search-session-input', 'new-session-button'). */
   customUI?: readonly string[];
+  /** Custom placeholder for chat input. */
+  chatPlaceholder?: string;
   /** Custom phrases to show in the chat empty state. */
   phrases?: readonly string[];
 }
@@ -41,7 +41,7 @@ let settingsLoadPromise: Promise<SimpleChamberSettings> | null = null;
  */
 export async function loadSimpleChamberSettings(): Promise<SimpleChamberSettings> {
   if (settingsCache !== null) {
-    return settingsCache;
+    return settingsCache as SimpleChamberSettings;
   }
 
   if (settingsLoadPromise !== null) {
@@ -63,17 +63,17 @@ export async function loadSimpleChamberSettings(): Promise<SimpleChamberSettings
         settingsCache = {
           hiddenUI: Array.isArray(simplechamber.hiddenUI) ? simplechamber.hiddenUI : undefined,
           customUI: Array.isArray(simplechamber.customUI) ? simplechamber.customUI : undefined,
-          visibleTabs: Array.isArray(simplechamber.visibleTabs) ? simplechamber.visibleTabs : undefined,
+          chatPlaceholder: typeof simplechamber.chatPlaceholder === 'string' ? simplechamber.chatPlaceholder : undefined,
           phrases: Array.isArray(simplechamber.phrases) ? simplechamber.phrases : undefined,
-        };
+        } as SimpleChamberSettings;
         return settingsCache;
       }
 
       settingsCache = {};
-      return settingsCache;
+      return settingsCache as SimpleChamberSettings;
     } catch {
       settingsCache = {};
-      return settingsCache;
+      return settingsCache as SimpleChamberSettings;
     }
   })();
 
@@ -97,15 +97,15 @@ export async function initSimpleChamberConfig(): Promise<void> {
 
   // Merge: API settings override defaults
   const mergedConfig: UIConfig = {
-    visibleTabs: apiSettings.visibleTabs?.length
-      ? (apiSettings.visibleTabs as MainTab[])
-      : DEFAULT_UI_CONFIG.visibleTabs,
     hiddenUI: apiSettings.hiddenUI?.length
       ? apiSettings.hiddenUI
       : DEFAULT_UI_CONFIG.hiddenUI,
     customUI: apiSettings.customUI?.length
       ? apiSettings.customUI
       : DEFAULT_UI_CONFIG.customUI,
+    chatPlaceholder: apiSettings.chatPlaceholder
+      ? apiSettings.chatPlaceholder
+      : DEFAULT_UI_CONFIG.chatPlaceholder,
     phrases: apiSettings.phrases?.length
       ? apiSettings.phrases
       : DEFAULT_UI_CONFIG.phrases,
@@ -129,11 +129,9 @@ function getUIConfig(): UIConfig {
  */
 export function getVisibleTabs(): readonly MainTab[] {
   const config = getUIConfig();
-  const visible = config.visibleTabs;
-  if (!visible || visible.length === 0) {
-    return ALL_TABS;
-  }
-  return visible;
+  const hidden = config.hiddenUI || [];
+
+  return ALL_TABS.filter((tab) => !hidden.includes(`tab-${tab}`));
 }
 
 /**
@@ -167,4 +165,13 @@ export function hasCustomUI(featureId: string): boolean {
 export function getChatPhrases(): readonly string[] | undefined {
   const config = getUIConfig();
   return config.phrases;
+}
+
+/**
+ * Returns the custom chat placeholder text.
+ * If not configured, returns undefined (falls back to default).
+ */
+export function getChatPlaceholder(): string | undefined {
+  const config = getUIConfig();
+  return config.chatPlaceholder;
 }

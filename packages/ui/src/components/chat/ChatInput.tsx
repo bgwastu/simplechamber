@@ -47,6 +47,8 @@ import {
 } from '@/components/ui/dropdown-menu';
 import { useThemeSystem } from '@/contexts/useThemeSystem';
 
+import { getChatPlaceholder } from '@/lib/customConfig';
+
 const MAX_VISIBLE_TEXTAREA_LINES = 8;
 const EMPTY_QUEUE: QueuedMessage[] = [];
 
@@ -122,6 +124,7 @@ export const ChatInput: React.FC<ChatInputProps> = ({ onOpenSettings, scrollToBo
     const { isMobile, inputBarOffset, isKeyboardOpen, setTimelineDialogOpen, cornerRadius, persistChatDraft } = useUIStore();
     const { working } = useAssistantStatus();
     const { currentTheme } = useThemeSystem();
+    const customPlaceholder = getChatPlaceholder();
     const [showAbortStatus, setShowAbortStatus] = React.useState(false);
     const abortTimeoutRef = React.useRef<ReturnType<typeof setTimeout> | null>(null);
     const prevWasAbortedRef = React.useRef(false);
@@ -1829,7 +1832,7 @@ export const ChatInput: React.FC<ChatInputProps> = ({ onOpenSettings, scrollToBo
                         onPaste={handlePaste}
                         onPointerDownCapture={handleTextareaPointerDownCapture}
                         placeholder={currentSessionId || newSessionDraftOpen
-                            ? "# for agents; @ for files; / for commands"
+                            ? (customPlaceholder || "# for agents; @ for files; / for commands")
                             : "Select or create a session to start chatting"}
                         disabled={!currentSessionId && !newSessionDraftOpen}
                         autoCorrect={isMobile ? "on" : "off"}

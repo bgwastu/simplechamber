@@ -433,7 +433,7 @@ export interface ProjectEntry {
 export interface SimpleChamberSettings {
   hiddenUI?: string[];
   customUI?: string[];
-  visibleTabs?: string[];
+  chatPlaceholder?: string;
   phrases?: string[];
 }
 

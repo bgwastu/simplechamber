@@ -618,7 +618,8 @@ export const Header: React.FC = () => {
     return base.filter(
       (t) =>
         visibleTabs.includes(t.id) &&
-        (t.id !== 'git' || !isUIHidden('git'))
+        (t.id !== 'git' || !isUIHidden('git')) &&
+        (t.id !== 'diff' || !isUIHidden('diff-view-tabs'))
     );
   }, [diffFileCount, isMobile, showPlanTab]);
 

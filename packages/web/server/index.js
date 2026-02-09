@@ -925,7 +925,7 @@ const sanitizeSettingsUpdate = (payload) => {
     const sc = candidate.simplechamber;
     if (Array.isArray(sc.hiddenUI)) result.simplechamber.hiddenUI = sc.hiddenUI;
     if (Array.isArray(sc.customUI)) result.simplechamber.customUI = sc.customUI;
-    if (Array.isArray(sc.visibleTabs)) result.simplechamber.visibleTabs = sc.visibleTabs;
+    if (typeof sc.chatPlaceholder === 'string') result.simplechamber.chatPlaceholder = sc.chatPlaceholder;
     if (Array.isArray(sc.phrases)) result.simplechamber.phrases = sc.phrases;
   }
 if (typeof candidate.themeId === 'string' && candidate.themeId.length > 0) {
