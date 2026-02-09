@@ -980,6 +980,7 @@ export const Header: React.FC = () => {
         )}
         <McpDropdown headerIconButtonClass={headerIconButtonClass} />
 
+        {!isUIHidden('keyboard-shortcuts') && (
         <Tooltip delayDuration={500}>
           <TooltipTrigger asChild>
             <button
@@ -995,6 +996,7 @@ export const Header: React.FC = () => {
             <p>Keyboard Shortcuts ({getModifierLabel()}+.)</p>
           </TooltipContent>
         </Tooltip>
+        )}
         {githubAuthStatus?.connected && !isMobile ? (
           githubAccounts.length > 1 ? (
             <DropdownMenu>

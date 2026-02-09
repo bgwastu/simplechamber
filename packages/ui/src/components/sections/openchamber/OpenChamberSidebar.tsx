@@ -4,6 +4,7 @@ import { useDeviceInfo } from '@/lib/device';
 import { isVSCodeRuntime, isWebRuntime } from '@/lib/desktop';
 import { AboutSettings } from './AboutSettings';
 import { cn } from '@/lib/utils';
+import { isUIHidden } from '@/lib/customConfig';
 
 export type OpenChamberSection = 'visual' | 'chat' | 'sessions' | 'git' | 'github' | 'notifications';
 
@@ -65,13 +66,17 @@ export const OpenChamberSidebar: React.FC<OpenChamberSidebarProps> = ({
   const isVSCode = React.useMemo(() => isVSCodeRuntime(), []);
   const isWeb = React.useMemo(() => isWebRuntime(), []);
 
+  const hideGit = isUIHidden('git');
+
   const visibleSections = React.useMemo(() => {
     return OPENCHAMBER_SECTION_GROUPS.filter((group) => {
       if (group.webOnly && !isWeb) return false;
       if (group.hideInVSCode && isVSCode) return false;
+      // Hide git and github sections when git is hidden via customConfig
+      if (hideGit && (group.id === 'git' || group.id === 'github')) return false;
       return true;
     });
-  }, [isWeb, isVSCode]);
+  }, [isWeb, isVSCode, hideGit]);
 
   // Desktop app: transparent for blur effect
   // VS Code: bg-background (same as page content)

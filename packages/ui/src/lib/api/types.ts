@@ -430,6 +430,12 @@ export interface ProjectEntry {
   sidebarCollapsed?: boolean;
 }
 
+export interface SimpleChamberSettings {
+  hiddenUI?: string[];
+  customUI?: string[];
+  visibleTabs?: string[];
+}
+
 export interface SettingsPayload {
   themeId?: string;
   useSystemTheme?: boolean;
@@ -463,6 +469,7 @@ export interface SettingsPayload {
   directoryShowHidden?: boolean;
   filesViewShowGitignored?: boolean;
   openInAppId?: string;
+  simplechamber?: SimpleChamberSettings;
 
   [key: string]: unknown;
 }

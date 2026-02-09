@@ -75,7 +75,7 @@ import { useRuntimeAPIs } from '@/hooks/useRuntimeAPIs';
 import type { GitHubPullRequestStatus } from '@/lib/api/types';
 import { GitHubIssuePickerDialog } from './GitHubIssuePickerDialog';
 import { GitHubPullRequestPickerDialog } from './GitHubPullRequestPickerDialog';
-import { isUIHidden } from '@/lib/customConfig';
+import { isUIHidden, hasCustomUI } from '@/lib/customConfig';
 
 const ATTENTION_DIAMOND_INDICES = new Set([1, 3, 4, 5, 7]);
 
@@ -2474,6 +2474,7 @@ export const SessionSidebar: React.FC<SessionSidebarProps> = ({
       expandedSessionGroups,
       collapsedGroups,
       hideDirectoryControls,
+      hideGit,
       currentSessionDirectory,
       projectRepoStatus,
       worktreePrByGroupKey,
@@ -2608,6 +2609,7 @@ export const SessionSidebar: React.FC<SessionSidebarProps> = ({
                 </DropdownMenuItem>
               </DropdownMenuContent>
             </DropdownMenu>
+            {!hideGit && (
             <button
               type="button"
               onClick={handleOpenDirectoryDialog}
@@ -2620,8 +2622,9 @@ export const SessionSidebar: React.FC<SessionSidebarProps> = ({
             >
               <RiFolderAddLine className="h-4.5 w-4.5" />
             </button>
+            )}
           </div>
-          {reserveHeaderActionsSpace && !isUIHidden('session-header-actions') && (
+          {reserveHeaderActionsSpace && !isUIHidden('session-header-actions') && !isUIHidden('git') && (
             <div className="mt-1 h-8 pl-1">
               {activeProjectIsRepo && (
               <div className="inline-flex h-8 items-center gap-1.5 rounded-md pl-0 pr-1">
@@ -2769,6 +2772,7 @@ export const SessionSidebar: React.FC<SessionSidebarProps> = ({
                     isStuck={stuckProjectHeaders.has(projectKey)}
                     hideDirectoryControls={hideDirectoryControls}
                     mobileVariant={mobileVariant}
+                    showCreateButtons={!hideGit}
                     onToggle={() => toggleProject(projectKey)}
                     onHoverChange={(hovered) => setHoveredProjectId(hovered ? projectKey : null)}
                     onNewSession={() => {
@@ -2821,7 +2825,6 @@ export const SessionSidebar: React.FC<SessionSidebarProps> = ({
                     onClose={() => removeProject(projectKey)}
                     sentinelRef={(el) => { projectHeaderSentinelRefs.current.set(projectKey, el); }}
                     settingsAutoCreateWorktree={settingsAutoCreateWorktree}
-                    showCreateButtons={false}
                     hideHeader
                   >
                     {!isCollapsed ? (
@@ -2889,6 +2892,26 @@ export const SessionSidebar: React.FC<SessionSidebarProps> = ({
                           <div className="py-1 text-left typography-micro text-muted-foreground">
                             No sessions yet.
                           </div>
+                        )}
+                        {/* Create New Session button at bottom of project */}
+                        {hasCustomUI('new-session-button') && (
+                          <button
+                            type="button"
+                            onClick={() => {
+                              if (projectKey !== activeProjectId) {
+                                setActiveProject(projectKey);
+                              }
+                              setActiveMainTab('chat');
+                              if (mobileVariant) {
+                                setSessionSwitcherOpen(false);
+                              }
+                              openNewSessionDraft({ directoryOverride: project.normalizedPath });
+                            }}
+                            className="mt-2 flex w-full items-center justify-center gap-2 rounded-md border border-dashed border-border/60 px-3 py-2 text-muted-foreground transition-colors hover:border-primary/50 hover:bg-interactive-hover/30 hover:text-foreground focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-primary/50"
+                          >
+                            <RiAddLine className="h-4 w-4" />
+                            <span className="typography-ui-label">Create New Session</span>
+                          </button>
                         )}
                       </div>
                     ) : null}

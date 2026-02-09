@@ -12,20 +12,24 @@ declare global {
 }
 
 window.__OPENCHAMBER_RUNTIME_APIS__ = createWebAPIs();
-// Optional UI config (visible tabs, hidden UI). UI reads from window.__OPENCHAMBER_UI_CONFIG__.
-const win = window as Window & { __OPENCHAMBER_UI_CONFIG__?: { visibleTabs?: string[]; hiddenUI?: string[] } };
+// Default UI config (visible tabs, hidden UI, added UI). 
+// These are overridden by settings.json simplechamber.* values if present.
+const win = window as Window & { __OPENCHAMBER_UI_CONFIG__?: { visibleTabs?: string[]; hiddenUI?: string[]; customUI?: string[] } };
 if (win.__OPENCHAMBER_UI_CONFIG__ === undefined) {
   win.__OPENCHAMBER_UI_CONFIG__ = {
     visibleTabs: ['chat', 'plan', 'terminal', 'files'],
     hiddenUI: [
-      'git',
+      'git', // also hides: git-identities, session-header-actions
       'multi-run',
       'about',
-      'git-identities',
       'message-fork',
       'message-new-session',
       'diff-view-tabs',
-      'session-header-actions',
+      'keyboard-shortcuts',
+    ],
+    customUI: [
+      'search-session-input',
+      'new-session-button',
     ],
   };
 }

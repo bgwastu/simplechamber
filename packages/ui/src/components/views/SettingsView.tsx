@@ -117,7 +117,7 @@ export const SettingsView: React.FC<SettingsViewProps> = ({ onClose, forceMobile
 
   const isVSCode = React.useMemo(() => isVSCodeRuntime(), []);
 
-  const hideGitIdentities = isUIHidden('git-identities');
+  const hideGitIdentities = isUIHidden('git-identities') || isUIHidden('git');
   const settingsSections = React.useMemo(() => getSettingsSections(isVSCode, hideGitIdentities), [isVSCode, hideGitIdentities]);
 
   const isDesktopApp = isTauri;

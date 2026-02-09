@@ -1,4 +1,5 @@
 import type { MainTab } from '@/stores/useUIStore';
+import type { SimpleChamberSettings } from '@/lib/api/types';
 
 const ALL_TABS: readonly MainTab[] = [
   'chat',
@@ -14,12 +15,95 @@ export interface UIConfig {
   visibleTabs?: readonly MainTab[];
   /** Feature IDs to hide (e.g. 'rate-limits', 'command-palette'). */
   hiddenUI?: readonly string[];
+  /** Custom UI feature IDs to enable (e.g. 'search-session-input', 'new-session-button'). */
+  customUI?: readonly string[];
 }
 
 declare global {
   interface Window {
     __OPENCHAMBER_UI_CONFIG__?: UIConfig;
+    __SIMPLECHAMBER_SETTINGS_LOADED__?: boolean;
   }
+}
+
+// Cache for settings loaded from API
+let settingsCache: SimpleChamberSettings | null = null;
+let settingsLoadPromise: Promise<SimpleChamberSettings> | null = null;
+
+/**
+ * Load SimpleChamber settings from the settings API.
+ * Returns cached settings if already loaded.
+ */
+export async function loadSimpleChamberSettings(): Promise<SimpleChamberSettings> {
+  if (settingsCache !== null) {
+    return settingsCache;
+  }
+
+  if (settingsLoadPromise !== null) {
+    return settingsLoadPromise;
+  }
+
+  settingsLoadPromise = (async () => {
+    try {
+      const response = await fetch('/api/config/settings', {
+        method: 'GET',
+        headers: { Accept: 'application/json' },
+      });
+      if (!response.ok) {
+        return {};
+      }
+      const data = await response.json();
+      const simplechamber = data?.simplechamber;
+      if (simplechamber && typeof simplechamber === 'object') {
+        settingsCache = {
+          hiddenUI: Array.isArray(simplechamber.hiddenUI) ? simplechamber.hiddenUI : undefined,
+          customUI: Array.isArray(simplechamber.customUI) ? simplechamber.customUI : undefined,
+          visibleTabs: Array.isArray(simplechamber.visibleTabs) ? simplechamber.visibleTabs : undefined,
+        };
+        return settingsCache;
+      }
+      settingsCache = {};
+      return settingsCache;
+    } catch {
+      settingsCache = {};
+      return settingsCache;
+    }
+  })();
+
+  return settingsLoadPromise;
+}
+
+/**
+ * Initialize SimpleChamber settings from the API and merge with window config.
+ * Call this early in app startup.
+ */
+export async function initSimpleChamberConfig(): Promise<void> {
+  if (typeof window === 'undefined') {
+    return;
+  }
+
+  if (window.__SIMPLECHAMBER_SETTINGS_LOADED__) {
+    return;
+  }
+
+  const apiSettings = await loadSimpleChamberSettings();
+  const windowConfig = window.__OPENCHAMBER_UI_CONFIG__ ?? {};
+
+  // Merge API settings with window config (API settings take precedence)
+  const mergedConfig: UIConfig = {
+    visibleTabs: apiSettings.visibleTabs?.length
+      ? (apiSettings.visibleTabs as MainTab[])
+      : windowConfig.visibleTabs,
+    hiddenUI: apiSettings.hiddenUI?.length
+      ? apiSettings.hiddenUI
+      : windowConfig.hiddenUI,
+    customUI: apiSettings.customUI?.length
+      ? apiSettings.customUI
+      : windowConfig.customUI,
+  };
+
+  window.__OPENCHAMBER_UI_CONFIG__ = mergedConfig;
+  window.__SIMPLECHAMBER_SETTINGS_LOADED__ = true;
 }
 
 function getUIConfig(): UIConfig {
@@ -52,4 +136,16 @@ export function isUIHidden(featureId: string): boolean {
     return false;
   }
   return hidden.includes(featureId);
+}
+
+/**
+ * Returns true if the given custom UI feature ID is enabled.
+ */
+export function hasCustomUI(featureId: string): boolean {
+  const config = getUIConfig();
+  const customUI = config.customUI;
+  if (!customUI) {
+    return false;
+  }
+  return customUI.includes(featureId);
 }
